@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.messages import constants
 from datetime import datetime, timedelta
 from paciente.models import Consulta, Documento
+from django.db.models import Count
     
 @login_required
 def cadastro_medico(request):
@@ -86,7 +87,7 @@ def abrir_horario(request):
     
 
 
-
+@login_required
 def consultas_medico(request):
     if not is_medico(request.user):
         messages.add_message(request, constants.WARNING, 'Somente médicos podem acessar essa página.')
@@ -100,7 +101,7 @@ def consultas_medico(request):
     return render(request, 'consultas_medico.html', {'consultas_hoje': consultas_hoje, 'consultas_restantes': consultas_restantes, 'is_medico': is_medico(request.user)})
 
 
-
+@login_required
 def consulta_area_medico(request, id_consulta):
     if not is_medico(request.user):
         messages.add_message(request, constants.WARNING, 'Somente médicos podem acessar essa página.')
@@ -131,7 +132,7 @@ def consulta_area_medico(request, id_consulta):
         return redirect(f'/medicos/consulta_area_medico/{id_consulta}')
     
 
-
+@login_required
 def finalizar_consulta(request, id_consulta):
     if not is_medico(request.user):
         messages.add_message(request, constants.WARNING, 'Somente médicos podem acessar essa página.')
@@ -146,7 +147,7 @@ def finalizar_consulta(request, id_consulta):
     consulta.save()   
     return redirect(f'/medicos/consulta_area_medico/{id_consulta}') 
 
-
+@login_required
 def add_documento(request, id_consulta):
     if not is_medico(request.user):
         messages.add_message(request, constants.WARNING, 'Somente médicos podem acessar essa página.')
@@ -177,3 +178,18 @@ def add_documento(request, id_consulta):
 
     messages.add_message(request, constants.SUCCESS, 'Documento enviado com sucesso!')
     return redirect(f'/medicos/consulta_area_medico/{id_consulta}')
+
+@login_required
+def dashboard(request):
+    if not is_medico(request.user):
+        messages.add_message(request, constants.WARNING, 'Somente médicos podem acessar essa página.')
+        return redirect('/usuarios/sair')
+    
+    consultas = Consulta.objects.filter(data_aberta__user=request.user)\
+    .filter(data_aberta__data__range=[datetime.now().date() - timedelta(days=7), datetime.now().date() + timedelta(days=1)])\
+    .values('data_aberta__data').annotate(quantidade=Count('id'))
+
+    datas = [i['data_aberta__data'].strftime("%d-%m-%Y") for i in consultas]
+    quantidade = [i['quantidade'] for i in consultas]
+
+    return render(request, 'dashboard.html', {'datas': datas, 'quantidade': quantidade})

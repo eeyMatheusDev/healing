@@ -142,3 +142,5 @@ MESSAGE_TAGS = {
     constants.INFO: 'alert-info',
     constants.WARNING: 'alert-warning',
 }
+
+LOGIN_URL = '/usuarios/login/'
