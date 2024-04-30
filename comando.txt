@@ -1,0 +1,20 @@
+python -m venv venv
+venv\Scripts\Activate
+
+pip install django
+pip install pillow
+
+django-admin startproject healing .
+
+python manage.py startapp usuarios
+python manage.py startapp medico
+python manage.py startapp paciente
+
+python manage.py makemigrations
+python manage.py migrate
+
+python manage.py runserver
+
+python manage.py createsuperuser
+
+pip freeze > requirements.txt
