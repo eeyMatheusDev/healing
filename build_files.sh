@@ -1,10 +1,9 @@
 ```sh
 #!/usr/bin/env bash
 
-echo “Migrando banco de dados…”
-python3 manage.py makemigrations — noinput
-python3 manage.py migrate — noinput
+pip install django
+pip install pillow
+pip install psycopg2-binary
+python3 manage.py collectstatic --noinput
 
-echo “Coletando arquivos estáticos…”
-python3 manage.py collectstatic — noinput
 ```
